@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Firebase service account key file
+# Add the specific name of your service account key JSON file here
+# For example, if your file is called 'firebase-service-account.json':
+# firebase-service-account.json
+# Or, to ignore all JSON files in the root (use with caution):
+# *.json 
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS generated files
+.DS_Store
+Thumbs.db
