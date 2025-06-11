@@ -10,18 +10,32 @@ app.use(express.json()); // Use express.json() for parsing application/json
 
 // Initialize Firebase Admin SDK
 try {
-  const serviceAccountPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-  if (!serviceAccountPath) {
-    throw new Error("GOOGLE_APPLICATION_CREDENTIALS environment variable is not set. Please point it to your Firebase service account key JSON file.");
+  // const serviceAccountPath = process.env.GOOGLE_APPLICATION_CREDENTIALS; // Old way: using file path
+  // if (!serviceAccountPath) {
+  //   throw new Error("GOOGLE_APPLICATION_CREDENTIALS environment variable is not set. Please point it to your Firebase service account key JSON file.");
+  // }
+  // const serviceAccount = require(serviceAccountPath); // Old way: loading from file
+
+  const serviceAccountJsonString = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
+  if (!serviceAccountJsonString) {
+    throw new Error("GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable is not set or is empty. Please provide the Firebase service account key JSON content.");
   }
-  const serviceAccount = require(serviceAccountPath); // Load service account key
+  
+  let serviceAccount;
+  try {
+    serviceAccount = JSON.parse(serviceAccountJsonString); // Parse the JSON string
+  } catch (parseError) {
+    console.error("Failed to parse GOOGLE_APPLICATION_CREDENTIALS_JSON:", parseError);
+    throw new Error("The content of GOOGLE_APPLICATION_CREDENTIALS_JSON is not valid JSON.");
+  }
+
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
     // If you are using Firebase Realtime Database, you might also need:
     // databaseURL: "https://<YOUR_PROJECT_ID>.firebaseio.com" 
     // If you are using Firestore, it's typically auto-detected.
   });
-  console.log("Firebase Admin SDK initialized successfully.");
+  console.log("Firebase Admin SDK initialized successfully from GOOGLE_APPLICATION_CREDENTIALS_JSON.");
 } catch (error) {
   console.error("Firebase Admin SDK initialization error:", error.message);
   process.exit(1); // Exit if Firebase Admin SDK fails to initialize
