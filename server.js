@@ -10,14 +10,34 @@ app.use(express.json()); // Use express.json() for parsing application/json
 
 // Initialize Firebase Admin SDK
 try {
-  // const serviceAccountPath = process.env.GOOGLE_APPLICATION_CREDENTIALS; // Old way: using file path
-  // if (!serviceAccountPath) {
-  //   throw new Error("GOOGLE_APPLICATION_CREDENTIALS environment variable is not set. Please point it to your Firebase service account key JSON file.");
-  // }
-  // const serviceAccount = require(serviceAccountPath); // Old way: loading from file
-
+  // Check if GOOGLE_APPLICATION_CREDENTIALS_JSON is set (for Railway/production)
   const serviceAccountJsonString = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
-  if (!serviceAccountJsonString) {
+
+  // ---- START DEBUG LOG ----
+  console.log('[DEBUG] Attempting to read GOOGLE_APPLICATION_CREDENTIALS_JSON.');
+  if (serviceAccountJsonString && serviceAccountJsonString.trim() !== "") {
+    console.log('[DEBUG] GOOGLE_APPLICATION_CREDENTIALS_JSON is present and not empty.');
+    console.log('[DEBUG] Length of GOOGLE_APPLICATION_CREDENTIALS_JSON:', serviceAccountJsonString.length);
+    // Log the first few and last few characters to check for completeness without exposing the whole key
+    console.log('[DEBUG] GOOGLE_APPLICATION_CREDENTIALS_JSON starts with:', serviceAccountJsonString.substring(0, 30));
+    console.log('[DEBUG] GOOGLE_APPLICATION_CREDENTIALS_JSON ends with:', serviceAccountJsonString.substring(serviceAccountJsonString.length - 30));
+    
+    // Attempt to parse to see if it's valid JSON structure early on
+    try {
+      JSON.parse(serviceAccountJsonString);
+      console.log('[DEBUG] GOOGLE_APPLICATION_CREDENTIALS_JSON appears to be valid JSON.');
+    } catch (e) {
+      console.error('[DEBUG] GOOGLE_APPLICATION_CREDENTIALS_JSON is NOT valid JSON. Parse error:', e.message);
+    }
+  } else if (serviceAccountJsonString === "") {
+    console.log('[DEBUG] GOOGLE_APPLICATION_CREDENTIALS_JSON is present BUT EMPTY.');
+  }
+  else {
+    console.log('[DEBUG] GOOGLE_APPLICATION_CREDENTIALS_JSON is NOT present (undefined or null).');
+  }
+  // ---- END DEBUG LOG ----
+
+  if (!serviceAccountJsonString || serviceAccountJsonString.trim() === "") {
     throw new Error("GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable is not set or is empty. Please provide the Firebase service account key JSON content.");
   }
   
